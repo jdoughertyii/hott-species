@@ -124,22 +124,6 @@ corresponding species $\fst : \sm{A : \finset}\Phi(A) \to \finset$.  By Lemma
 of this form.  So we can specify a species up to equality by giving a family
 $\Phi : \finset \to \UU$ and taking the first projection to be the map.
 
-Certain aspects of the theory of species follow naturally from this setup.
-There is a notion of transport of species along bijections.  In classical
-terms, if $A$ and $B$ are two finite sets and $\sigma : A \to B$ a bijection
-between them, then a structure on $A$ can be transported along $\sigma$ to
-produce a structure on $B$.  In \ac{HoTT} terms, a bijection of sets is a path
-$p : A = B$, and if we have a species $f : X \to \finset$ and an inhabitant
-$z : \hfib{f}{A}$, then we can obtain an inhabitant $p_{*}(z) : \hfib{f}{B}$ by
-the transport principle in \ac{HoTT} (Lemma 2.3.1 in the \ac{HoTT} Book).
-Similarly, if $f : X \to \finset$ and $g : Y \to \finset$ are two species, then
-they are equipotent just in case $\hfib{f}{A}$ is isomorphic to $\hfib{g}{A}$
-for all $A : \finset$, and species-theoretic properties are invariant with
-respect to equipotence.  In \ac{HoTT} terms the species are equipotent just in
-case they are equal, and all properties are invariant under equality.  Since
-\ac{HoTT} takes care of transport and equipotence for us, we can basically
-ignore them.
-
 All of this is just setup for the main application of species: generating
 functions.  Given a species $X$, we want to cook up a formal power series
 \[
@@ -450,7 +434,7 @@ since $\abs{X + Y} = \abs{X} + \abs{Y}$ for all groupoids $X$ and $Y$.  So, the
 generating function $\gf{X+Y}$ is the sum of the generating functions $\gf{X}
 + \gf{Y}$.
 
-\subsection{Product}
+\subsection{Hadamard product}
 We can tell a similar story with $\times$ instead of $+$.  Where $X + Y$ is
 the species of ``$X$ stuff or $Y$ stuff on a finite set'', the product should
 give ``$X$ stuff and $Y$ stuff on a finite set''.  But this is ambiguous: there are two ways to put
@@ -460,7 +444,6 @@ one, the recursion principle for the product needs something of type $X \to Y
 \to \finset$ to produce a species.  The two kinds of products on species
 correspond to different ways of doing this.
 
-\paragraph{Hadamard product}
 One way is to ``superpose'' the
 $X$ stuff and $Y$ stuff.  That is, we might take the fiber over $\fin(n)$ to be
 \begin{align*}
@@ -517,7 +500,7 @@ the ring of formal power series is treated as Fock space, the Hadamard product
 of two formal power series gives the inner product on Fock space.  The
 relationship between the generating functions themselves is messy.
 
-\paragraph{Cauchy product}
+\subsection{Cauchy product}
 A more natural relationship between generating functions would be some species
 $X \cdot Y$ such that
 \[
@@ -1038,41 +1021,6 @@ product by demanding that
 for all $\psi, \phi \in \mathbb{C}[z]$.  Completing $\mathbb{C}[z]$ in this
 inner product gives Fock space $K[z]$.
 
-This can all be categorified.  For any species $f : X \to \finset$, define $AX
-\defeq X'$ and $A^{*}X = Z \cdot X$.  We have
-\begin{align*}
-  \inner{A^{*}X}{Y}
-  &=
-  \sm{A:\finset}{w : Z \cdot X}{y:Y}\left(
-    (\unit + f(\snd(w)) = g(y)) \times (\unit + f(\snd(w)) = A)
-  \right)
-  \\&=
-  \sm{A, B:\finset}{x:X}{y:Y}\left(
-    (\unit + f(x) = B) \times (\unit + f(x) = g(y)) \times (\unit + f(x) = A)
-  \right)
-  \\&=
-  \\&=
-  \sm{A : \finset}{x:X}{y:Y}
-  \left(
-    (g(y) = f(x) + \unit) \times (f(x) = A)
-  \right)
-  \\&=
-  \sm{A, B : \finset}{x:X}{y:Y}
-  \left(
-    (g(y) = B + \unit) \times (f(x) = B) \times (f(x) = A)
-  \right)
-  \\&=
-  \sm{A : \finset}{x:X}{y' : Y'}\left(
-    (f(x) = \fst(y')) \times (f(x) = A)
-  \right)
-  \\&=
-  \inner{X}{AY}
-\end{align*}
-
-
-
-
-
 \section{Cayley's Formula}
 We recount \citeauthor{Joyal1981}'s proof of the following
 \begin{thm}[Cayley's Formula] 
@@ -1101,9 +1049,6 @@ order on the vertebral column.  Since $L_{n} = \mathrm{Per}_{n}$, it suffices
 to consider $S_{+} \circ T_{\bullet}$, which is equal to $\mathrm{End}_{+}$.
 Since $\mathrm{End}_{n} = n^{n}$, for $n > 0$ we have $V_{n} = n^{n}$, from
 which follows Cayley's formula.
-
-
-
 
 
 
