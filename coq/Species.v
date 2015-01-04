@@ -2,11 +2,7 @@ Require Import HoTT Arith FinSet GCard.
 
 Definition Species : Type := {X : Type & X -> FinSet}.
 
-Definition spec_from_stuff (P : FinSet -> Type) : Species.
-Proof.
-  exists (sigT P).
-  apply pr1.
-Defined.
+Definition spec_from_stuff (P : FinSet -> Type) : Species := (sigT P; pr1).
 
 Lemma functor_sigma_inverse_beta {A B : Type} `{P : A -> Type} `{Q : B -> Type}
       (f : A -> B) (g : forall a, P a -> Q (f a))
@@ -86,13 +82,8 @@ Defined.
   
 (** * Species Sum/Coproduct *)
 
-Definition spec_sum (X Y : Species) : Species.
-Proof.
-  induction X as [X f], Y as [Y g].
-  exists (X + Y)%type. intros [x|y].
-  - apply (f x).
-  - apply (g y).
-Defined.
+Definition spec_sum (X Y : Species) : Species
+    := ((X.1 + Y.1)%type; sum_rect _ X.2 Y.2).
 
 Lemma sigma_functor_sum (X : Type) (P Q : X -> Type) :
   ({x : X & P x} + {x : X & Q x}) <~> {x : X & (P x + Q x)%type}.
@@ -151,9 +142,8 @@ Defined.
 
 Definition spec_hprod (X Y : Species) : Species.
 Proof.
-  induction X as [X f], Y as [Y g].
-  exists {x : X & {y : Y & f x = g y}}.
-  intros [x [y p]]. apply (f x).
+  exists {x : X.1 & {y : Y.1 & X.2 x = Y.2 y}}.
+  apply (X.2 o pr1).
 Defined.
 
 Definition stuff_spec_hprod (P Q : FinSet -> Type) := fun A => (P A * Q A)%type.
@@ -256,9 +246,8 @@ Defined.
 
 Definition spec_cprod (X Y : Species) : Species.
 Proof.
-  induction X as [X f], Y as [Y g].
-  exists (X * Y)%type. intros [x y].
-  apply (fs_sum (f x) (g y)).
+  exists (X.1 * Y.1)%type.
+  apply (fun z => (fs_sum (X.2 (fst z)) (Y.2 (snd z)))).
 Defined.
 
 
@@ -311,10 +300,8 @@ Defined.
 
 Definition spec_compose (X Y : Species) : Species.
 Proof.
-  induction X as [X f], Y as [Y g].
-  exists {x : X & Fin (card (f x)) -> Y}.
-  intros [x P].
-  apply (fin_indexed_sum (card (f x)) (g o P)).
+  exists {x : X.1 & Fin (card (X.2 x)) -> Y.1}.
+  intro w. apply (fin_indexed_sum (card (X.2 w.1)) (Y.2 o w.2)).
 Defined.
 
 Definition stuff_spec_compose (P Q : FinSet -> Type)
@@ -334,12 +321,8 @@ Admitted.
   
 (** * Derivative *)
 
-Definition spec_derivative (X : Species) : Species.
-Proof.
-  induction X as [X f].
-  exists {A : FinSet & {x : X & f x = fs_sum A (FSFin 1)}}.
-  apply pr1.
-Defined.
+Definition spec_derivative (X : Species) : Species
+  := spec_from_stuff (fun A => {x : X.1 & X.2 x = fs_sum A (FSFin 1)}).
 
 Definition stuff_spec_derivative (P : FinSet -> Type) 
   := fun A => {B : FinSet & (P B * (B = fs_sum A (FSFin 1)))%type}.
@@ -349,7 +332,7 @@ Lemma stuff_spec_derivative_correct (P : FinSet -> Type)
     =
     spec_derivative (spec_from_stuff P).
 Proof.
-  refine (_ @ (all_spec_from_stuff _).2^). apply path_stuff_spec. intro A.
+  apply path_stuff_spec. intro A.
   simpl. unfold stuff_spec_derivative.
   
   equiv_via {B : FinSet & {_ : B = fs_sum A (FSFin 1) & P B}}.
@@ -363,39 +346,17 @@ Proof.
   equiv_via {w : {B : FinSet & B = fs_sum A (FSFin 1)} & P w.1}.
   refine (equiv_sigma_assoc _ _).
 
-  equiv_via (P (center {B : FinSet & B = fs_sum A (FSFin 1)}).1).
-  refine (equiv_contr_sigma _). simpl. symmetry.
-  unfold hfiber.
-
-  equiv_via {x : {B : FinSet & P (fs_sum B (FSFin 1))} & x.1 = A}.
-  refine (equiv_functor_sigma' _ _).
-  refine (equiv_functor_sigma_id _). intro B.
-  
-  equiv_via {C : FinSet & {p : P C & C = fs_sum B (FSFin 1)}}.
+  symmetry.
+  equiv_via {B : FinSet & {_ : P B & B = fs_sum A (FSFin 1)}}.
   symmetry. refine (equiv_sigma_assoc _ _).
-  equiv_via {C : FinSet & {_ : C = fs_sum B (FSFin 1) & P C}}.
-  refine (equiv_functor_sigma_id _). intro C.
-  apply equiv_sigma_symm0.
 
-  equiv_via {w : {C : FinSet & C = fs_sum B (FSFin 1)} & P w.1}.
-  refine (equiv_sigma_assoc _ _). 
-
-  equiv_via (P (center {C : FinSet & C = fs_sum B (FSFin 1)}).1).
-  refine (equiv_contr_sigma _). apply equiv_idmap. intro w. apply equiv_idmap.
-
-  equiv_via {B : FinSet & {_ : P (fs_sum B (FSFin 1)) & B = A}}.
-  symmetry. refine (equiv_sigma_assoc _ _). 
-  
-  equiv_via {B : FinSet & {_ : B = A & P (fs_sum B (FSFin 1))}}.
+  equiv_via {B : FinSet & {_ : B = fs_sum A (FSFin 1) & P B}}.
   refine (equiv_functor_sigma_id _). intro B.
   apply equiv_sigma_symm0.
-
-  equiv_via {w : {B : FinSet & B = A} & P (fs_sum w.1 (FSFin 1))}.
-  refine (equiv_sigma_assoc _ _). 
   
-  equiv_via (P (fs_sum (center {B : FinSet & B = A}).1 (FSFin 1))).
-  refine (equiv_contr_sigma _). apply equiv_idmap. 
+  refine (equiv_sigma_assoc _ _).
 Defined.
+  
 
 
 Lemma gf_spec_derivative (X : Species) (n : nat)
@@ -425,9 +386,8 @@ Defined.
 
 Definition spec_pointing (X : Species) : Species.
 Proof.
-  induction X as [X f].
-  exists {x : X & (f x).1}.
-  intros [x w]. apply (f x).
+  exists {x : X.1 & (X.2 x).1}.
+  intro w. apply (X.2 w.1).
 Defined.
 
 Definition stuff_spec_pointing (P : FinSet -> Type) 
@@ -476,9 +436,8 @@ Admitted.
 
 Definition spec_inhab (X : Species) : Species.
 Proof.
-  induction X as [X f].
-  exists {x : X & merely (f x).1}.
-  apply (f o pr1).
+  exists {x : X.1 & merely (X.2 x).1}.
+  apply (X.2 o pr1).
 Defined.
 
 Definition stuff_spec_inhab (P : FinSet -> Type)
@@ -514,3 +473,25 @@ Proof.
   refine (equiv_contr_sigma _). apply equiv_idmap. 
 Defined.
   
+
+(** * Labeling *)
+
+Definition spec_label (X : Species) 
+  := spec_hprod X (spec_from_stuff (fun A => A = FSFin (card A))).
+
+Definition stuff_spec_label (P : FinSet -> Type)
+  := fun A => (P A * (A = FSFin (card A)))%type.
+
+Lemma stuff_spec_label_correct (P : FinSet -> Type)
+  : spec_from_stuff (stuff_spec_label P)
+    =
+    spec_label (spec_from_stuff P).
+Proof.
+  refine (_ @ (all_spec_from_stuff _).2^). apply path_stuff_spec. intro A.
+  simpl. unfold stuff_spec_label. unfold hfiber. symmetry.
+
+  equiv_via {x : {x : {x : _ & P x} &
+     {y : {C : FinSet & C = FSFin (card C)} &
+     x.1 = y.1}} & x.1.1 = A}.
+Admitted.
+

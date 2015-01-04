@@ -1,4 +1,4 @@
-Require Import HoTT Arith FinSet Species.
+Require Import HoTT Arith FinSet GCard Species.
 
 (** * Defining Trees *)
 
@@ -29,9 +29,11 @@ Proof.
   apply (fun _ => e).
 Defined.
 
-Definition Tree : Species.
+Definition LTree : Species.
 Proof.
-  exists {G : Graph & ((Connected G) * (Acyclic G))%type}.
+  exists {G : Graph & ((Connected G) 
+                       * (Acyclic G) 
+                       * (G.1.1 = Fin (card G.1)))%type}.
   apply (fun G => G.1.1).
 Defined.
   
@@ -39,29 +41,36 @@ Defined.
 
 (** * Vertebrates *)
 
-Definition Vertebrate := spec_pointing (spec_pointing Tree).
+Definition LArborescence := spec_pointing LTree.
+
+Definition Vertebrate := spec_pointing (spec_pointing LTree).
 
 Lemma gf_verts_tree (n : nat) 
-  : gf Vertebrate n = (exp n 2) * (gf Tree n).
+  : gf Vertebrate n = (exp n 2) * (gf LTree n).
 Proof.
   refine ((gf_spec_pointing _ _) @ _ @ (mult_assoc _ _ _)^). f_ap.
   refine ((gf_spec_pointing _ _) @ _). f_ap.
   apply (mult_1_r _)^.
 Defined.
 
-Definition InhabPerm : Species.
-Proof.
-  exists {A : FinSet & ((merely A.1) * (A = FSFin (card A)))%type}.
-  apply pr1.
-Defined.
-
-
-Definition Arborescence := spec_pointing Tree.
+Definition LOrd := spec_from_stuff (fun A => A.1 = Fin (card A)).
 
 
 Lemma vert_is_inhab_lord_arb 
-  : Vertebrate = (spec_compose InhabPerm Arborescence).
+  : Vertebrate = (spec_compose (spec_inhab LOrd) LArborescence).
 Proof.
 Admitted.
 
-Definition end_spec := spec_from_stuff (fun A => A.1 -> A.1).
+Definition end_spec := spec_from_stuff (fun A : FinSet => A.1 -> A.1).
+
+Lemma gf_end_spec (n : nat) : gf end_spec n = exp n n.
+Proof.
+  (* universe inconsistencies again *)
+Admitted.
+    
+Lemma inhab_lord_arb_is_end
+  : spec_compose (spec_inhab LOrd) LArborescence = end_spec.
+Admitted.
+  
+  
+  

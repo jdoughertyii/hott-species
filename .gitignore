@@ -35,3 +35,7 @@ qg-fall03.pdf
 species.tex
 species.pdf
 
+
+*.swp
+
+*.temp

@@ -117,9 +117,7 @@ Admitted.
 
 (** *** inhabited finite sets *)
 
-Definition inhab_ensembles := spec_inhabited ensembles.
-
-
+Definition inhab_ensembles := spec_inhab ensembles.
 
 Lemma gf_inhab_ensembles (n : nat)
   : gf inhab_ensembles n = (gcard (BAut (Fin n))) * (1 - (ddelta n O)).
@@ -156,35 +154,39 @@ Proof.
         simpl. induction p. reflexivity.
 Defined.
 
-Definition even_set_spec 
+Definition COSH
   := spec_from_stuff (fun A => {n : nat & card A = (2 * n)}).
-Definition odd_set_spec 
+Definition SINH
   := spec_from_stuff (fun A => {n : nat & card A = S (2 * n)}).
 
-
-Lemma even_or_odd (n : nat)
-  : {m : nat & ((n = (2 * m)%nat) + (n = S (2 * m)))%type}.
-Proof.
-  induction n.
-  - exists O. left. reflexivity.
-  - induction IHn as [m [p | p]].
-    + exists m. right. apply (ap S p).
-    + exists (S m). left. simpl. apply (ap S).
-      refine (p @ _). symmetry. apply plus_n_Sm.
-Defined.
-
 Lemma even_or_odd__ensembles
-  : spec_sum even_set_spec odd_set_spec = ensembles.
+  : spec_sum COSH SINH = ensembles.
 Proof.
-  refine ((stuff_spec_sum_correct _ _)^ @ _).
-  apply contr_stuff_spec. intros A.
-  unfold stuff_spec_sum. 
-  apply (contr_equiv' {n : nat & ((card A = (2 * n)%nat) 
-                                  + (card A = S (2 * n)))%type}).
-  - symmetry. apply sigma_functor_sum.
-  - exists (even_or_odd (card A)). intros [n [p | p]].
     (* Universe problems again *)
 Admitted.
 
 
 (** ** 0-stuff *)
+
+Definition Zn (n : nat) : Species := (Unit; const (FSFin n)).
+
+Lemma gf_Zn (n m : nat) : gf (Zn n) m = ddelta n m.
+Proof.
+  unfold gf, hfiber, ddelta. simpl.
+  destruct (decpaths_nat n m); simpl.
+  - path_via (gcard (BAut (Fin m)) * gcard (FSFin n = FSFin m)). 
+    + f_ap. apply gcard_equiv'.
+      refine (equiv_adjointify _ _ _ _).
+      * intros [z q]. apply q.
+      * intro q. apply (tt; q).
+      * intro q. reflexivity.
+      * intros [z q]. induction z. reflexivity.
+    + admit. (* need the full [gcard] *)
+  - path_via (gcard (BAut (Fin m)) * O).
+    + f_ap. refine (_ @ gcard_empty). apply gcard_equiv'.
+      refine (BuildEquiv _ _ _ _).
+      intros [z p]. contradiction n0.
+      apply Fn_Fm__n_m. apply p..1.
+    + apply mult_O_r.
+Defined.
+      
