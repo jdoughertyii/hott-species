@@ -398,7 +398,7 @@ coproduct gives us a species with type $X + Y \to \finset$.
   The coproduct species $(f + g) : X + Y \to \finset$ is given by
   \begin{align*}
     (f + g) &: X + Y \to \finset \\
-    (f + g) &: (x, y) \mapsto f(x) + g(y)
+    (f + g) &\defeq \rec{X+Y}(\finset, f, g)
   \end{align*}
 \end{defn}
 \noindent

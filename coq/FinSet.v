@@ -56,6 +56,26 @@ Defined.
 Definition Fin_lift_ne_fmax {n : nat} (z : Fin n) : Fin_lift z <> (fmax n)
   := inl_ne_inr _ _.
   
+(* Garsia-Milne involution *)
+Lemma cancelR_Fn (A B : Type) (n : nat)
+  : (A + Fin n)%type = (B + Fin n)%type -> A = B.
+Proof.
+  induction n.
+  - intro p. apply path_universe_uncurried.
+    
+    equiv_via (A + Empty)%type. equiv_via (Empty + A)%type.
+    symmetry. apply empty_sum. apply equiv_sum_symm.
+
+    equiv_via (B + Empty)%type. apply (equiv_path _ _ p).
+
+    equiv_via (Empty + B)%type. apply equiv_sum_symm.
+    apply empty_sum.
+
+Admitted.
+
+
+    
+
 
 Lemma cancelR_Fn_U (n m : nat) 
   : Fin (S n) = Fin (S m) -> Fin n = Fin m.
